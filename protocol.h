@@ -55,6 +55,8 @@ void BT_CheckConn(int conn);
 //byte __generic_slave_response_array[5] = {0xFF, 0x00, 0x42, 0x00, 0xFF};
 
 
+// ---- attente d'une connexion ----
+
 void BT_WaitConn(int conn){
     state state; // état de la connexion
     do {
@@ -88,6 +90,9 @@ void BT_WaitConn(int conn){
 }
 
 
+// ---- Vérification de la connexion ----
+
+
 void BT_CheckConn(int conn){
     byte state = BluetoothStatus(conn);
     
@@ -116,6 +121,8 @@ void BT_CheckConn(int conn){
 }
 
 
+// ---- Envoi de messages ----
+
 
 void BT_SlaveResponseSend(byte response){
     // creation du buffer d'envoi
@@ -134,7 +141,6 @@ void BT_SlaveResponseSend(byte response){
     BluetoothWrite(MASTER,_send_buffer);
     BT_WaitConn(MASTER);
 }
-
 
 
 void __BT_MasterCommandSend(byte *command_array, int array_len){
@@ -160,6 +166,7 @@ void __BT_MasterCommandSend(byte *command_array, int array_len){
     free(_send_buffer);
 }
 
+
 void __BT_OneByteFunc(byte commande){
     byte _command_buffer[1] = {commande};
     __BT_MasterCommandSend(_command_buffer, 1);
@@ -180,4 +187,49 @@ void BT_RotateMotorEx(byte power, byte angle, byte turn_ratio, bool sync_bool, b
     // on note le tout dans une variable pour une simple raison de __lisibilité_
     byte _command_buffer[6] = {BOT_ROTATE_MOTOR_EX, power, angle, turn_ratio, sync, stop};
     __BT_MasterCommandSend(_command_buffer, 6);
+}
+
+
+// ---- Réception de messages ----
+
+
+byte BT_ReadFromSlave(){
+    byte msg[1]; // on sait que l'esclave ne renvoie qu'un byte.
+    string str_msg; // on en a forcément besoin... dommage
+    BT_WaitConn(SLAVE);
+    // second paramètre : supprimer le message de la bal
+    ReceiveMessage(MAILBOX, true, str_msg);
+    BT_WaitConn(SLAVE);
+    StrToByteArray(str_msg, msg);
+    return msg;
+}
+
+// pour les messages en provenance du master, il faudra tester le premier byte.
+// En fait, on récupère un tableau (donc un pointeur) reste à savoir quelle est
+// la taille de ce tableau pour pouvoir itérer dessus.
+// La taille est définie par le premier octet du message.
+byte BT_ReadFromMaster(){
+    string inter;
+    // allocation d'un buffer temporaire
+    byte *_tmp_buffer = malloc(6*sizeof(byte));
+    BT_WaitConn(MASTER);
+    ReceiveMessage(MAILBOX, true, inter);
+    BT_WaitConn(MASTER);
+    StrToByteArray(str, _tmp_buffer);
+    
+    // on détermine la taille en regardant l'octet 1
+    if (_tmp_buffer[0] == BOT_ROTATE_MOTOR_EX) {
+        int taille = 6;
+    } else if (_tmp_buffer[0] == BOT_ON_FWD) {
+        int taille = 2;
+    } else {
+        int taille = 1;
+    }
+    byte *msg = malloc(taille * sizeof(byte));
+    int i; // variable d'itération
+    for (i = 0; i < taille; i++) {
+        msg[i] = _tmp_buffer[i];
+    }
+    free(_tmp_buffer);
+    return msg;
 }
