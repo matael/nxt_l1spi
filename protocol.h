@@ -32,10 +32,10 @@
 #define BT_Decalage() __BT_OneByteFunc(BOT_DECALAGE)
 
 
-
 // Motors
 #define BOT_SELECT_MOTOR_B 0xFB
 #define BOT_SELECT_MOTOR_C 0xFC
+#define BOT_MOTORS OUT_BC
 
 // Réponses
 #define SLAVE_ALL_IS_OK 0x42
@@ -63,6 +63,8 @@ void BT_OnFwd(byte motor, byte pwr);
 byte *BT_ReadFromMaster();
 // Lecture d'une réponse qui vient de l'esclave
 byte *BT_ReadFromSlave();
+// Décode les ordre 1 octet du maitre et les exécute
+void BT_OneByteDecode(byte command);
 
 
 // ----- Variables globales -----
@@ -247,4 +249,30 @@ byte *BT_ReadFromMaster(){
     }
     free(_tmp_buffer);
     return msg;
+}
+
+void BT_OneByteDecode(byte command){
+    switch(command) {
+        case BOT_OFF: 
+            Off(BOT_MOTORS);
+            break;
+        case BOT_QUART_TOUR_D:
+            quart_tour_d();
+            break;
+        case BOT_QUART_TOUR_G:
+            quart_tour_g();
+            break;
+        case BOT_VIRAGE_D:
+            virage_d();
+            break;
+        case BOT_VIRAGE_G:
+            virage_g();
+            break;
+        case BOT_DEMI_TOUR:
+            demi_tour();
+            break();
+        case BOT_DECALAGE;
+            decalage();
+            break;
+    }
 }
