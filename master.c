@@ -101,18 +101,6 @@ void Amorcage_suivi_ligne(); // recherche une ligne, puis, une fois trouvée, am
 
 
 
-//======================
-//   SHORT FONCTIONS
-//======================
-void quart_tour_d() { RotateMotorEx(motors, 90, 590, 100, true, false);}   // faire un quart de tour par la droite
-void quart_tour_g() { RotateMotorEx(motors, 90, 590, -100, true, false);}  // faire un quart de tour par la gauche
-void demi_tour() { quart_tour_g(); quart_tour_g(); } // deux quarts de tour, car lui faire faire un demi-tour avec RotateMotorEx() est imprécis
-void Virage_gauche(){ left_speed = VITESSE_MIN_MOTEUR; right_speed = VITESSE_MAX_MOTEUR; } // virage à gauche
-void Virage_droite(){ left_speed = VITESSE_MAX_MOTEUR; right_speed = VITESSE_MIN_MOTEUR; } // virage à droite
-void Decalage() { RotateMotor(motors, VITESSE_DE_CROISIERE, 550); } //  décalage lors de la gestion d'obstacle
-
-
-
 
 // Définitions des fonctions
 
