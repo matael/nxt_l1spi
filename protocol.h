@@ -60,9 +60,9 @@ void BT_RotateMotorEx(byte power, byte angle, byte turn_ratio, bool sync_bool, b
 // Abstraction pour OnFwd
 void BT_OnFwd(byte motor, byte pwr);
 // Lecture d'un message qui vient du maître
-byte BT_ReadFromMaster();
+byte *BT_ReadFromMaster();
 // Lecture d'une réponse qui vient de l'esclave
-byte BT_ReadFromSlave();
+byte *BT_ReadFromSlave();
 
 
 // ----- Variables globales -----
@@ -207,7 +207,7 @@ void BT_RotateMotorEx(byte power, byte angle, byte turn_ratio, bool sync_bool, b
 
 // ---- Réception de messages ----
 
-byte BT_ReadFromSlave(){
+byte *BT_ReadFromSlave(){
     byte msg[1]; // on sait que l'esclave ne renvoie qu'un byte.
     string str_msg; // on en a forcément besoin... dommage
     BT_WaitConn(SLAVE);
@@ -222,7 +222,7 @@ byte BT_ReadFromSlave(){
 // En fait, on récupère un tableau (donc un pointeur) reste à savoir quelle est
 // la taille de ce tableau pour pouvoir itérer dessus.
 // La taille est définie par le premier octet du message.
-byte BT_ReadFromMaster(){
+byte *BT_ReadFromMaster(){
     string inter;
     
     // allocation d'un buffer temporaire
