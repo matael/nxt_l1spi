@@ -207,7 +207,6 @@ void BT_RotateMotorEx(byte power, byte angle, byte turn_ratio, bool sync_bool, b
 
 // ---- Réception de messages ----
 
-byte BT_ReadFromMaster()
 byte BT_ReadFromSlave(){
     byte msg[1]; // on sait que l'esclave ne renvoie qu'un byte.
     string str_msg; // on en a forcément besoin... dommage
