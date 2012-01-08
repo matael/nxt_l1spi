@@ -48,6 +48,21 @@
 void BT_WaitConn(int conn);
 // Verification de la connexion
 void BT_CheckConn(int conn);
+// Envoi de réponse depuis l'esclave
+void BT_SlaveResponseSend(byte response);
+// Envoi "en dur" d'une vecteur d'octets depuis le maître
+void __BT_MasterCommandSend(byte *command_array, int array_len);
+// Abstraction pour les commandes sur un octet
+// Voir les macros pour les commandes particulières
+void __BT_OneByteFunc(byte commande);
+// Abstraction pour la commande RotateMotorEx
+void BT_RotateMotorEx(byte power, byte angle, byte turn_ratio, bool sync_bool, bool stop_bool);
+// Abstraction pour OnFwd
+void BT_OnFwd(byte motor, byte pwr);
+// Lecture d'un message depuis le maître
+byte BT_ReadFromMaster();
+// Lecture d'une réponse depuis l'esclave
+byte BT_ReadFromSlave();
 
 
 // ----- Variables globales -----
@@ -192,7 +207,7 @@ void BT_RotateMotorEx(byte power, byte angle, byte turn_ratio, bool sync_bool, b
 
 // ---- Réception de messages ----
 
-
+byte BT_ReadFromMaster()
 byte BT_ReadFromSlave(){
     byte msg[1]; // on sait que l'esclave ne renvoie qu'un byte.
     string str_msg; // on en a forcément besoin... dommage
