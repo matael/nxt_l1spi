@@ -120,8 +120,8 @@ void MT_quart_tour_g(){
     BT_QuartTourG(); // lancement de l'ordre à l'esclave
 }
 
-void MT_OnDecalage(){
-    OnDecalage();    // bouger le robot maître
+void MT_Decalage(){
+    Decalage();    // bouger le robot maître
     BT_Decalage(); // lancement de l'ordre à l'esclave
 }
 
