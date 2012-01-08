@@ -59,9 +59,9 @@ void __BT_OneByteFunc(byte commande);
 void BT_RotateMotorEx(byte power, byte angle, byte turn_ratio, bool sync_bool, bool stop_bool);
 // Abstraction pour OnFwd
 void BT_OnFwd(byte motor, byte pwr);
-// Lecture d'un message depuis le maître
+// Lecture d'un message qui vient du maître
 byte BT_ReadFromMaster();
-// Lecture d'une réponse depuis l'esclave
+// Lecture d'une réponse qui vient de l'esclave
 byte BT_ReadFromSlave();
 
 
