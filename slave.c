@@ -15,7 +15,7 @@
 
 task main(){
   // wait for a connection to the master
-  BT_WaitConn(MASTER);
+  BT_ChackConn(SLAVE);
   
   
   // connection etablished
@@ -25,11 +25,11 @@ task main(){
     
     // call the right function
     if (order[0] == BOT_ROTATE_MOTOR_EX) {
-        BT_RotateMotorEx(order[1], order[2], order[3], order[4], order[5]);
+        Slave_RotateMotorEx(order);
     } else if (order[0] == BOT_ON_FWD) {
-        BT_OnFwd(order[1], order[2]);
+        Slave_OnFwd(order);
     } else {
-        __BT_OneByteFunc(order[1]);
+        Slave_OneByteDecode(order[1]);
     }
   } // end while
 } // end task main()
