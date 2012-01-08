@@ -15,7 +15,7 @@
 
 task main(){
   // wait for a connection to the master
-  BT_ChackConn(SLAVE);
+  BT_CheckConn(SLAVE);
   
   
   // connection etablished
