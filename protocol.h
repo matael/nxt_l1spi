@@ -68,6 +68,10 @@ byte *BT_ReadFromMaster();
 byte *BT_ReadFromSlave();
 // Décode les ordre 1 octet du maitre et les exécute
 void BT_OneByteDecode(byte command);
+// Décode et exécute un RotateMotorEx sur le slave
+void Slave_RotateMotorEx(byte *command);
+// Décode et exécute un OnFwd sur le slave
+void Slave_OnFwd(byte *command);
 
 
 // ----- Variables globales -----
@@ -169,7 +173,7 @@ void __BT_MasterCommandSend(byte *command_array, int array_len){
     _send_buffer[0] = 0x80;       // "no reply telegram"
     _send_buffer[1] = 0x09;       // "MessageWrite Direct Command"
     _send_buffer[2] = MAILBOX;    // selection de la boite aux lettres
-    _send_buffer[3] = array_len;          // Longueur de la donnée
+    _send_buffer[3] = array_len;  // Longueur de la donnée
 
     // ajout de la donnée
     int i = 4;
@@ -195,9 +199,9 @@ void __BT_OneByteFunc(byte commande){
 
 void BT_OnFwd(byte motor, byte pwr){
     // partie "commande de la trame"
-    byte _command_buffer[2] = {motor,pwr};
+    byte _command_buffer[3] = {BOT_ON_FWD,motor,pwr};
     // envoi
-    __BT_MasterCommandSend(_command_buffer, 2);
+    __BT_MasterCommandSend(_command_buffer, 3);
 }
 
 void BT_RotateMotorEx(byte power, byte angle, byte turn_ratio, bool sync_bool, bool stop_bool){
@@ -254,7 +258,9 @@ byte *BT_ReadFromMaster(){
     return msg;
 }
 
-void BT_OneByteDecode(byte command){
+// ---- Decode ----
+
+void Slave_OneByteDecode(byte command){
     switch(command) {
         case BOT_OFF: 
             Off(BOT_MOTORS);
@@ -278,4 +284,14 @@ void BT_OneByteDecode(byte command){
             decalage();
             break;
     }
+}
+
+
+void Slave_OnFwd(byte *command){
+    OnFwd(command[1], command[2]);
+}
+
+
+void Slave_RotateMotorEx(byte *command){
+    RotateMotorEx(BOT_MOTORS,command[1], command[2], command[3], command[4], command[5]);
 }
