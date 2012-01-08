@@ -111,32 +111,32 @@ void MT_OnFwd(int motors, int speed){
 }
 
 void MT_quart_tour_d(){
-    MT_quart_tour_d();    // bouger le robot maître
+    quart_tour_d();    // bouger le robot maître
     BT_QuartTourD(); // lancement de l'ordre à l'esclave
 }
 
 void MT_quart_tour_g(){
-    MT_quart_tour_g();    // bouger le robot maître
+    quart_tour_g();    // bouger le robot maître
     BT_QuartTourG(); // lancement de l'ordre à l'esclave
 }
 
 void MT_OnDecalage(){
-    MT_OnDecalage();    // bouger le robot maître
+    OnDecalage();    // bouger le robot maître
     BT_Decalage(); // lancement de l'ordre à l'esclave
 }
 
 void MT_demi_tour(){
-    MT_quart_tour_g(); // bouger le robot maître
-    MT_quart_tour_g(); // lancement de l'ordre à l'esclave
+    MT_quart_tour_g(); // deux appels du quart de tour
+    MT_quart_tour_g(); //     avec mouvement et lancement d'ordre
 }
 
 void MT_Virage_gauche(){
-    MT_Virage_gauche();    // bouger le robot maître
+    Virage_gauche();    // bouger le robot maître
     BT_VirageGauche(); // lancement de l'ordre à l'esclave
 }
 
 void MT_Virage_droite(){
-    MT_Virage_droite();    // bouger le robot maître
+    Virage_droite();    // bouger le robot maître
     BT_VirageDroite(); // lancement de l'ordre à l'esclave
 }
 
