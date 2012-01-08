@@ -43,4 +43,10 @@ void Virage_droite() {
 } 
 
 
+//  décalage lors de la gestion d'obstacle
+void Decalage() { 
+  RotateMotor(motors, VITESSE_DE_CROISIERE, 550); 
+} 
+
+
 
