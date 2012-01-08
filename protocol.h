@@ -224,6 +224,7 @@ byte BT_ReadFromSlave(){
 // La taille est définie par le premier octet du message.
 byte BT_ReadFromMaster(){
     string inter;
+    string str;
     // allocation d'un buffer temporaire
     byte *_tmp_buffer = malloc(6*sizeof(byte));
     BT_WaitConn(MASTER);
