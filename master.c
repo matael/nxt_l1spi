@@ -5,7 +5,7 @@
  * Authors :
  *  Lucas Bourneuf
  *  Mathieu Gaborit
- * 
+ *
  * Date    : Janvier 2012
  * License : WTFPL
  *
@@ -104,7 +104,51 @@ void Amorcage_suivi_ligne(); // recherche une ligne, puis, une fois trouvée, am
 
 // Définitions des fonctions
 
+// fonctions déclenchant le mouvement du maître et le lancement de l'ordre vers les esclaves associés
+void MT_OnFwd(int motors, int speed){
+    OnFwd(motors, speed);    // bouger le robot maître
+    BT_OnFwd(motors, speed); // lancement de l'ordre à l'esclave
+}
 
+void MT_quart_tour_d(){
+    MT_quart_tour_d();    // bouger le robot maître
+    BT_QuartTourD(); // lancement de l'ordre à l'esclave
+}
+
+void MT_quart_tour_g(){
+    MT_quart_tour_g();    // bouger le robot maître
+    BT_QuartTourG(); // lancement de l'ordre à l'esclave
+}
+
+void MT_OnDecalage(){
+    MT_OnDecalage();    // bouger le robot maître
+    BT_Decalage(); // lancement de l'ordre à l'esclave
+}
+
+void MT_demi_tour(){
+    MT_quart_tour_g(); // bouger le robot maître
+    MT_quart_tour_g(); // lancement de l'ordre à l'esclave
+}
+
+void MT_Virage_gauche(){
+    MT_Virage_gauche();    // bouger le robot maître
+    BT_VirageGauche(); // lancement de l'ordre à l'esclave
+}
+
+void MT_Virage_droite(){
+    MT_Virage_droite();    // bouger le robot maître
+    BT_VirageDroite(); // lancement de l'ordre à l'esclave
+}
+
+void MT_RotateMotorEx(int motors, int speed, int angle, int ratio, int bol1, int bol2){
+    OnFwd(motors, speed, angle, ratio, bol1, bol2);    // bouger le robot maître
+    BT_OnFwd(motors, speed, angle, ratio, bol1, bol2); // lancement de l'ordre à l'esclave
+}
+
+void MT_Off(int motors){
+    Off(motors); // bouger le robot maître
+    BT_Off();    // lancement de l'ordre à l'esclave
+}
 
 
 
@@ -135,13 +179,13 @@ task Emergency_stop(){
                Wait(TEMPS_EMERGENCY_JAUNE);  // protection pour éviter de s'arrêter si le capteur détecte du jaune par accident
                if(Sensor(Couleur) == INPUT_YELLOWCOLOR){
                        Robot_Fonctionne = false; // le main arrête de tourner.
-                       Off(motors);    // arrêt des moteurs
+                       MT_Off(motors);    // arrêt des moteurs
                        StopAllTasks(); // arrêt du programme
                }
           }
           else if(compteur >= NB_MARQUE_MAX || Sensor(Touch)) { // si on a égalé ou dépassé le nombre de marque bleues maximum, on s'arrête. De même si on enclenche le capteur tactile.
                 Robot_Fonctionne = false; // le main arrête de tourner.
-                Off(motors);    // arrêt des moteurs
+                MT_Off(motors);    // arrêt des moteurs
                 affichage_FinDeProgramme(); // affichage du temps de parcours
                 StopAllTasks(); // arrêt du programme
           }
@@ -193,9 +237,9 @@ bool Presence_Obstacle_Avant(){
 //======================
 // gère l'esquive d'obstacle
 void Gestion_obstacle(){
-     RotateMotor(motors, VITESSE_DE_CROISIERE, -180);
-     quart_tour_g();
-     OnFwd(motors, 50);
+     MT_RotateMotorEx(motors, VITESSE_DE_CROISIERE, -180, 0, true, false);
+     MT_quart_tour_g();
+     MT_OnFwd(motors, 50);
      while(Presence_Obstacle_Droite()){
           couleur_vue = Sensor(Couleur);
           if(YA_UNE_LIGNE){
@@ -203,11 +247,11 @@ void Gestion_obstacle(){
                return; // on quitte la fonction, car on ne considère plus d'obstacle
           }
      } // end boucle while
-     Decalage(); // on avance un peu pour que l'ensemble du robot ne soit pas en face de l'obstacle
-     quart_tour_d();
+     MT_Decalage(); // on avance un peu pour que l'ensemble du robot ne soit pas en face de l'obstacle
+     MT_quart_tour_d();
 
-     Decalage(); // on avance un peu pour que l'ensemble du robot ne soit pas en face de l'obstacle
-     OnFwd(motors, 50); // on avance...
+     MT_Decalage(); // on avance un peu pour que l'ensemble du robot ne soit pas en face de l'obstacle
+     MT_OnFwd(motors, 50); // on avance...
      while(Presence_Obstacle_Droite()){ // ... tant qu'il y a un obstacle à droite
           couleur_vue = Sensor(Couleur);
           if(YA_UNE_LIGNE) { // si on rencontre une ligne, on quitte la fonction et on amorce la routine d'alignement avec ladite ligne
@@ -215,8 +259,8 @@ void Gestion_obstacle(){
                return;
           }
      } // end boucle while
-     Decalage(); // on s'écarte de l'obstacle
-     quart_tour_d(); // on est théoriquement face à la ligne que l'obstacle à bouché !
+     MT_Decalage(); // on s'écarte de l'obstacle
+     MT_quart_tour_d(); // on est théoriquement face à la ligne que l'obstacle à bouché !
      Etat_Esprit = CHERCHE_LIGNE; // on cherche cette ligne
 }
 
@@ -235,7 +279,7 @@ void lecture_couleur_bleu(){
              TextOut(25,LCD_LINE2, NumToStr(compteur));
          }
      }
-     OnFwd(motors,70);
+     MT_OnFwd(motors,70);
 }
 
 
@@ -246,19 +290,19 @@ void lecture_couleur_bleu(){
 //======================
 // recherche préliminaire de lignes en zonant dans l'espace immédiat
 void Zonage_espace_immediat(){
-     RotateMotorEx(motors, 100, 60, 100, true, true); // tourner sur quelques centimètres à droite
+     MT_RotateMotorEx(motors, 100, 60, 100, true, true); // tourner sur quelques centimètres à droite
      couleur_vue = Sensor(Couleur);
      if(YA_UNE_LIGNE) {
          Etat_Esprit = SUIVRE_LIGNE;
          return;
      }
-     RotateMotorEx(motors, 100, 120, -100, true, true); // tourner sur quelques centimètres à gauche
+     MT_RotateMotorEx(motors, 100, 120, -100, true, true); // tourner sur quelques centimètres à gauche
      couleur_vue = Sensor(Couleur);
      if(YA_UNE_LIGNE) {
          Etat_Esprit = SUIVRE_LIGNE;
          return;
      }
-     RotateMotorEx(motors, 100, 60, 100, true, true); // tourne pour revenir dans l'axe
+     MT_RotateMotorEx(motors, 100, 60, 100, true, true); // tourne pour revenir dans l'axe
      couleur_vue = Sensor(Couleur);
      if(YA_UNE_LIGNE) {
          Etat_Esprit = SUIVRE_LIGNE;
@@ -281,7 +325,7 @@ void recherche_de_ligne(){
          Zonage_espace_immediat();
 
          // on avance jusqu'à trouver une ligne
-         OnFwd(motors, 100);
+         MT_OnFwd(motors, 100);
          while(!YA_UNE_LIGNE) // tant qu'il y a pas de lignes
              { couleur_vue = Sensor(Couleur); }
 
@@ -290,7 +334,7 @@ void recherche_de_ligne(){
 
    } // end if (Sensor(Couleur) == INPUT_WHITECOLOR)
    Etat_Esprit = SUIVRE_LIGNE; // on a trouvé une ligne !
-   OnFwd(motors,VITESSE_DE_CROISIERE);
+   MT_OnFwd(motors,VITESSE_DE_CROISIERE);
 }
 
 
@@ -301,23 +345,23 @@ void recherche_de_ligne(){
 //======================
 // Amorce le suivis de ligne en s'aligant avec la ligne trouvée
 void Amorcage_suivi_ligne(){
-    RotateMotorEx(motors, 100, 140, 0, false, true); // parcourir quelques centimètres pour dépasser la ligne
+    MT_RotateMotorEx(motors, 100, 140, 0, false, true); // parcourir quelques centimètres pour dépasser la ligne
     while(couleur_vue != INPUT_BLACKCOLOR && couleur_vue != INPUT_BLUECOLOR) // si ya pas de ligne noire (ou bleue)
     {
         couleur_vue = Sensor(Couleur); // on regarde la couleur
         if(couleur_vue == INPUT_WHITECOLOR || couleur_vue == INPUT_REDCOLOR) // si blanc ou rouge, on tourne
-            RotateMotorEx(motors, 75, 10, -100, true, false); // vers la gauche, pour trouver un eligne noire dans le bon sens
+            MT_RotateMotorEx(motors, 75, 10, -100, true, false); // vers la gauche, pour trouver un eligne noire dans le bon sens
 
         if(couleur_vue == INPUT_GREENCOLOR){ // si vert
-            RotateMotorEx(motors, 100, 60, 100, true, true); // on se tourne vers la droite
+            MT_RotateMotorEx(motors, 100, 60, 100, true, true); // on se tourne vers la droite
             couleur_vue = Sensor(Couleur); // on regarde la couleur
             if(YA_UNE_LIGNE){ // si ya une ligne
                   Etat_Esprit = SUIVRE_LIGNE; // on a trouvé une ligne !
-                  OnFwd(motors,VITESSE_DE_CROISIERE);  // on continue l'exploration
+                  MT_OnFwd(motors,VITESSE_DE_CROISIERE);  // on continue l'exploration
                   return;
             }
             else  // si c'est du blanc, c'est qu'on est pas dans le bon sens... donc on se retourne !
-                  demi_tour(); // on fait un demi tour pour dépasser la ligne sans passer par la ligne jaune
+                  MT_demi_tour(); // on fait un demi tour pour dépasser la ligne sans passer par la ligne jaune
         } // end if (couleur_vue == INPUT_GREENCOLOR)
     } // end boucle d'attante de ligne noire ou bleu.
 }
@@ -344,18 +388,18 @@ task main() { // main(), l'épine dorsale du prgm
           }
 
           // le robot marche, et pas d'obstacle : on gère les moteurs en fonction des speeds propres
-          OnFwd(OUT_C, left_speed);
-          OnFwd(OUT_B, right_speed);
+          MT_OnFwd(OUT_C, left_speed);
+          MT_OnFwd(OUT_B, right_speed);
 
           // switch maître sur la variable couleur_vue
           switch (couleur_vue)
           {
               case INPUT_REDCOLOR:        // ROUGE
-                   Virage_gauche(); // virage à gauche
+                   MT_Virage_gauche(); // virage à gauche
                    break;
 
               case INPUT_GREENCOLOR:      // VERT
-                   Virage_droite(); // virage à droite
+                   MT_Virage_droite(); // virage à droite
                    break;
 
               case INPUT_BLUECOLOR:      // BLEU
@@ -365,7 +409,7 @@ task main() { // main(), l'épine dorsale du prgm
               case INPUT_YELLOWCOLOR:    // JAUNE
                   Wait(TEMPS_EMERGENCY_JAUNE);  // protection pour éviter de s'arrêter si le capteur détecte du jaune par accident
                   if(Sensor(Couleur) == INPUT_YELLOWCOLOR)
-                        Off(motors); // extinction des moteurs. La tache emergency_stop fera le reste si c'est pas déjà fait
+                        MT_Off(motors); // extinction des moteurs. La tache emergency_stop fera le reste si c'est pas déjà fait
                   break;
 
               case INPUT_WHITECOLOR:     // BLANC
@@ -375,7 +419,7 @@ task main() { // main(), l'épine dorsale du prgm
 
               default:  // toute autre cas, dont la lecture de noir
                   if(Robot_Fonctionne) // si le robot fonctionne toujours
-                      OnFwd(motors,VITESSE_DE_CROISIERE);
+                      MT_OnFwd(motors,VITESSE_DE_CROISIERE);
           } // end switch
 
           // actualisation de la dernière couleur vue
