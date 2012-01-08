@@ -6,6 +6,9 @@
  * License : WTFPL
  */
 
+// Déplacements de base
+#include "deplacements.h"
+
 #define MASTER 0
 #define SLAVE 1
 #define MAILBOX 0
