@@ -35,10 +35,10 @@
 #define BT_Decalage() __BT_OneByteFunc(BOT_DECALAGE)
 
 
-
 // Motors
 #define BOT_SELECT_MOTOR_B 0xFB
 #define BOT_SELECT_MOTOR_C 0xFC
+#define BOT_MOTORS OUT_BC
 
 // Réponses
 #define SLAVE_ALL_IS_OK 0x42
@@ -51,6 +51,23 @@
 void BT_WaitConn(int conn);
 // Verification de la connexion
 void BT_CheckConn(int conn);
+// Envoi de réponse depuis l'esclave
+void BT_SlaveResponseSend(byte response);
+// Envoi "en dur" d'une vecteur d'octets depuis le maître
+void __BT_MasterCommandSend(byte *command_array, int array_len);
+// Abstraction pour les commandes sur un octet
+// Voir les macros pour les commandes particulières
+void __BT_OneByteFunc(byte commande);
+// Abstraction pour la commande RotateMotorEx
+void BT_RotateMotorEx(byte power, byte angle, byte turn_ratio, bool sync_bool, bool stop_bool);
+// Abstraction pour OnFwd
+void BT_OnFwd(byte motor, byte pwr);
+// Lecture d'un message qui vient du maître
+byte *BT_ReadFromMaster();
+// Lecture d'une réponse qui vient de l'esclave
+byte *BT_ReadFromSlave();
+// Décode les ordre 1 octet du maitre et les exécute
+void BT_OneByteDecode(byte command);
 
 
 // ----- Variables globales -----
@@ -195,8 +212,7 @@ void BT_RotateMotorEx(byte power, byte angle, byte turn_ratio, bool sync_bool, b
 
 // ---- Réception de messages ----
 
-
-byte BT_ReadFromSlave(){
+byte *BT_ReadFromSlave(){
     byte msg[1]; // on sait que l'esclave ne renvoie qu'un byte.
     string str_msg; // on en a forcément besoin... dommage
     BT_WaitConn(SLAVE);
@@ -211,14 +227,15 @@ byte BT_ReadFromSlave(){
 // En fait, on récupère un tableau (donc un pointeur) reste à savoir quelle est
 // la taille de ce tableau pour pouvoir itérer dessus.
 // La taille est définie par le premier octet du message.
-byte BT_ReadFromMaster(){
+byte *BT_ReadFromMaster(){
     string inter;
+    
     // allocation d'un buffer temporaire
     byte *_tmp_buffer = malloc(6*sizeof(byte));
     BT_WaitConn(MASTER);
     ReceiveMessage(MAILBOX, true, inter);
     BT_WaitConn(MASTER);
-    StrToByteArray(str, _tmp_buffer);
+    StrToByteArray(inter, _tmp_buffer);
     
     // on détermine la taille en regardant l'octet 1
     if (_tmp_buffer[0] == BOT_ROTATE_MOTOR_EX) {
@@ -235,4 +252,30 @@ byte BT_ReadFromMaster(){
     }
     free(_tmp_buffer);
     return msg;
+}
+
+void BT_OneByteDecode(byte command){
+    switch(command) {
+        case BOT_OFF: 
+            Off(BOT_MOTORS);
+            break;
+        case BOT_QUART_TOUR_D:
+            quart_tour_d();
+            break;
+        case BOT_QUART_TOUR_G:
+            quart_tour_g();
+            break;
+        case BOT_VIRAGE_D:
+            virage_d();
+            break;
+        case BOT_VIRAGE_G:
+            virage_g();
+            break;
+        case BOT_DEMI_TOUR:
+            demi_tour();
+            break();
+        case BOT_DECALAGE;
+            decalage();
+            break;
+    }
 }
