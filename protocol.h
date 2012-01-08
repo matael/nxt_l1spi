@@ -224,13 +224,13 @@ byte BT_ReadFromSlave(){
 // La taille est définie par le premier octet du message.
 byte BT_ReadFromMaster(){
     string inter;
-    string str;
+    
     // allocation d'un buffer temporaire
     byte *_tmp_buffer = malloc(6*sizeof(byte));
     BT_WaitConn(MASTER);
     ReceiveMessage(MAILBOX, true, inter);
     BT_WaitConn(MASTER);
-    StrToByteArray(str, _tmp_buffer);
+    StrToByteArray(inter, _tmp_buffer);
     
     // on détermine la taille en regardant l'octet 1
     if (_tmp_buffer[0] == BOT_ROTATE_MOTOR_EX) {
