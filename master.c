@@ -18,26 +18,6 @@
 //======================
 //       DEFINES
 //======================
-// maitre
-#define BOT_OFF 0x00
-#define BOT_ROTATE_MOTOR_EX 0xAE
-#define BOT_ON_FWD 0xF0
-#define BOT_SELEC_MOTOR_B 0xFB // moteur droit
-#define BOT_SELEC_MOTOR_G 0xFC // moteur gauche
-
-// appel des shorts fonctions
-#define BOT_QUART_TOUR_D 0xC0
-#define BOT_QUART_TOUR_G 0xC1
-#define BOT_VIRAGE_D 0xB0
-#define BOT_VIRAGE_D 0xB1
-#define BOT_DEMI_TOUR 0xD1
-#define BOT_DECALAGE 0xDE
-
-// slave
-#define SLAVE_ALL_IS_OK 0x42
-#define SLAVE_NOTHING_TO_DO 0xD0
-#define SLAVE_BUMPER 0xBB
-#define SLAVE_C_LA_DECH 0xCD
 
 // capteurs et moteurs
 #define Couleur IN_2 // capteur couleur (vers le sol)
