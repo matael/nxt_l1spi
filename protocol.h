@@ -19,6 +19,7 @@
 
 // One Byte Commands
 #define BOT_OFF 0x00
+#define BOT_FIN_PROG 0x01
 #define BOT_QUART_TOUR_D 0xC0
 #define BOT_QUART_TOUR_G 0xC1
 #define BOT_VIRAGE_D 0xB0
@@ -33,6 +34,7 @@
 #define BT_VirageDroite() __BT_OneByteFunc(BOT_VIRAGE_D)
 #define BT_DemiTour() __BT_OneByteFunc(BOT_DEMI_TOUR)
 #define BT_Decalage() __BT_OneByteFunc(BOT_DECALAGE)
+#define BT_FinProgramme() __BT_OneByteFunc(BOT_FIN_PROG)
 
 
 // Motors
@@ -269,8 +271,11 @@ void Slave_OneByteDecode(byte command[6]){
         case BOT_DEMI_TOUR:
             demi_tour();
             break();
-        case BOT_DECALAGE;
+        case BOT_DECALAGE:
             decalage();
+            break;
+        case BOT_FIN_PROG:
+            Stop(true);
             break;
     }
 }
