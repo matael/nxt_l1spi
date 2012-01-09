@@ -54,7 +54,7 @@ void BT_CheckConn(int conn);
 // Envoi de réponse depuis l'esclave
 void BT_SlaveResponseSend(byte response);
 // Envoi "en dur" d'une vecteur d'octets depuis le maître
-void __BT_MasterCommandSend(byte *command_array, int array_len);
+void __BT_MasterCommandSend(byte command_array[6]);
 // Abstraction pour les commandes sur un octet
 // Voir les macros pour les commandes particulières
 void __BT_OneByteFunc(byte commande);
@@ -63,15 +63,15 @@ void BT_RotateMotorEx(byte power, byte angle, byte turn_ratio, bool sync_bool, b
 // Abstraction pour OnFwd
 void BT_OnFwd(byte motor, byte pwr);
 // Lecture d'un message qui vient du maître
-byte *BT_ReadFromMaster();
+void BT_ReadFromMaster(byte &msg[6]);
 // Lecture d'une réponse qui vient de l'esclave
-byte *BT_ReadFromSlave();
+void BT_ReadFromSlave(byte &msg[1]);
 // Décode les ordre 1 octet du maitre et les exécute
-void BT_OneByteDecode(byte command);
+void BT_OneByteDecode(byte command[6]);
 // Décode et exécute un RotateMotorEx sur le slave
-void Slave_RotateMotorEx(byte *command);
+void Slave_RotateMotorEx(byte command[6]);
 // Décode et exécute un OnFwd sur le slave
-void Slave_OnFwd(byte *command);
+void Slave_OnFwd(byte command[6]);
 
 
 // ----- Variables globales -----
@@ -167,9 +167,9 @@ void BT_SlaveResponseSend(byte response){
 }
 
 
-void __BT_MasterCommandSend(byte *command_array, int array_len){
+void __BT_MasterCommandSend(byte &command_array[6]){
     // Création du buffer d'envoi
-    byte* _send_buffer = malloc((4+array_len)*sizeof(byte));
+    byte _send_buffer[10] = {0};
     _send_buffer[0] = 0x80;       // "no reply telegram"
     _send_buffer[1] = 0x09;       // "MessageWrite Direct Command"
     _send_buffer[2] = MAILBOX;    // selection de la boite aux lettres
@@ -177,7 +177,7 @@ void __BT_MasterCommandSend(byte *command_array, int array_len){
 
     // ajout de la donnée
     int i = 4;
-    for (i = 0; i < array_len+4; i++) {
+    for (i = 0; i < 10; i++) {
         _send_buffer[i] = command_array[i-4];
     }
 
@@ -216,52 +216,41 @@ void BT_RotateMotorEx(byte power, byte angle, byte turn_ratio, bool sync_bool, b
 
 // ---- Réception de messages ----
 
-byte *BT_ReadFromSlave(){
-    byte msg[1]; // on sait que l'esclave ne renvoie qu'un byte.
+void BT_ReadFromSlave(byte &msg[1]){
     string str_msg; // on en a forcément besoin... dommage
     BT_WaitConn(SLAVE);
     // second paramètre : supprimer le message de la bal
     ReceiveMessage(MAILBOX, true, str_msg);
     BT_WaitConn(SLAVE);
     StrToByteArray(str_msg, msg);
-    return msg;
 }
 
 // pour les messages en provenance du master, il faudra tester le premier byte.
 // En fait, on récupère un tableau (donc un pointeur) reste à savoir quelle est
 // la taille de ce tableau pour pouvoir itérer dessus.
 // La taille est définie par le premier octet du message.
-byte *BT_ReadFromMaster(){
+void BT_ReadFromMaster(byte &msg[6]){
     string inter;
     
     // allocation d'un buffer temporaire
-    byte *_tmp_buffer = malloc(6*sizeof(byte));
+    byte _tmp_buffer[6];
     BT_WaitConn(MASTER);
     ReceiveMessage(MAILBOX, true, inter);
     BT_WaitConn(MASTER);
     StrToByteArray(inter, _tmp_buffer);
     
-    // on détermine la taille en regardant l'octet 1
-    if (_tmp_buffer[0] == BOT_ROTATE_MOTOR_EX) {
-        int taille = 6;
-    } else if (_tmp_buffer[0] == BOT_ON_FWD) {
-        int taille = 2;
-    } else {
-        int taille = 1;
-    }
-    byte *msg = malloc(taille * sizeof(byte));
+    byte msg[6];
     int i; // variable d'itération
     for (i = 0; i < taille; i++) {
         msg[i] = _tmp_buffer[i];
     }
-    free(_tmp_buffer);
     return msg;
 }
 
 // ---- Decode ----
 
-void Slave_OneByteDecode(byte command){
-    switch(command) {
+void Slave_OneByteDecode(byte command[6]){
+    switch(command[0]) {
         case BOT_OFF: 
             Off(BOT_MOTORS);
             break;
@@ -287,11 +276,11 @@ void Slave_OneByteDecode(byte command){
 }
 
 
-void Slave_OnFwd(byte *command){
+void Slave_OnFwd(byte command[6]){
     OnFwd(command[1], command[2]);
 }
 
 
-void Slave_RotateMotorEx(byte *command){
+void Slave_RotateMotorEx(byte command[6]){
     RotateMotorEx(BOT_MOTORS,command[1], command[2], command[3], command[4], command[5]);
 }
